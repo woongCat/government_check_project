@@ -1,0 +1,7 @@
+pandas
+numpy
+seaborn
+matplotlib
+requests
+python-dotenv
+apache-airflow
