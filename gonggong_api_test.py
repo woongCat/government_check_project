@@ -22,6 +22,10 @@ if __name__ == "__main__":
     
     # 공공데이터 국회의원 선거공약정보확인을 위한 코드 정보
     govcode_url = "http://apis.data.go.kr/9760000/CommonCodeService/getCommonSgCodeList"
-    govcode_params = {'serviceKey' : serviceKey, 'resultType' : 'json'}
+    govcode_params = {'serviceKey' : serviceKey, 'resultType' : 'json', 'pageNo' : '1', 'numOfRows' : '100'}
+    
+    # 추가로 할 일 
+    # 데이터를 반복문으로 읽고 데이터를 json으로 갱신하는 코드 작성
+    # 이 때 airflow를 활용해서 S3에 추가 적재할지를 고민
     
     api_test(govcode_url,params=govcode_params)
