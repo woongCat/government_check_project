@@ -13,7 +13,8 @@ def api_test(url,params):
         print(f"Error Code :{response.status_code}")
         
     with open(file_path, "w") as f:
-        json.dump(json.loads(response.content), f)
+        json.dump(json.loads(response.content), f, ensure_ascii=False, indent=4)
+        
     return
     
 if __name__ == "__main__":
