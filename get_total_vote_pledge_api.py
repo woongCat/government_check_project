@@ -6,7 +6,7 @@ import pandas as pd
         
         
 # json 파일을 받아서 df로 바꾸는 코드
-def read_api_to_df(url,params):
+def read_voteId_api_to_df(url,params):
     try:
         response = requests.get(url, params=params)
         response.raise_for_status()  # HTTP 에러가 있으면 예외 발생
@@ -32,14 +32,14 @@ def read_api_to_df(url,params):
     return json_to_df
 
 # 투표일 정보를 csv로 저장하는 코드
-def api_to_csv(url):
+def voteId_api_to_csv(url):
     
     df = pd.DataFrame()
     file_path = 'public_vote_code.csv'
     
     for i in range(1,10):
         params = {'serviceKey' : serviceKey, 'resultType' : 'json', 'pageNo' : f'{i}', 'numOfRows' : '100'}
-        new_df = read_api_to_df(url,params=params)
+        new_df = read_voteId_api_to_df(url,params=params)
         df = pd.concat([df, new_df])
         
     df.to_csv(file_path)
@@ -53,4 +53,4 @@ if __name__ == "__main__":
     govcode_url = "http://apis.data.go.kr/9760000/CommonCodeService/getCommonSgCodeList"
     
     # api code csv로 저장
-    api_to_csv(govcode_url)
+    voteId_api_to_csv(govcode_url)
