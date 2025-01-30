@@ -1,1 +1,7 @@
-url = "https://open.assembly.go.kr/portal/openapi/VCONFBUDGETCONFLIST"
+import requests
+
+url = "https://openwatch.kr/api/national-assembly/members"
+
+response = requests.get(url,headers={})
+
+print(response.json())

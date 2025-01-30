@@ -6,7 +6,9 @@ import pandas as pd
 
 def get_votecode():
     try:
-        csv_file = pd.read_csv('public_vote_code.csv')
+        # sgId 열을 문자열로 읽기
+        csv_file = pd.read_csv('public_vote_code.csv', dtype={'sgId': str, 'sgTypecode': int})
+        # sgTypecode가 2인 sgId 리스트 반환
         congress_vote_id_list = csv_file[csv_file['sgTypecode'] == 2]['sgId'].to_list()
         return congress_vote_id_list
     except FileNotFoundError:
@@ -17,7 +19,7 @@ def read_api_to_df(url, params):
     try:
         response = requests.get(url, params=params, timeout=10)
         response.raise_for_status()
-        print(f"Response status code: {response.status_code}")
+        print(f"Response status code: {response.text}")
     except requests.exceptions.RequestException as e:
         print(f"Error during API request: {e}")
         return pd.DataFrame()
@@ -64,6 +66,12 @@ def api_to_csv(url):
             df = pd.concat([df, new_df], ignore_index=True)
     
     df.drop_duplicates(inplace=True)
+    
+    # 필요한 열을 문자열로 변환
+    if 'sgId' in df.columns:
+        df['sgId'] = df['sgId'].astype(str)
+
+    # 데이터 저장
     df.to_csv(file_path, index=False, encoding='utf-8-sig')
     print(f"Data saved to {file_path}")
 

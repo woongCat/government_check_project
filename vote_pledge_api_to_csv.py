@@ -6,6 +6,7 @@ import pandas as pd
 import time
 
 def get_votecode():
+    ## 선거 공약 중 20200415에 해당하는 선거만 가져오는 코드
     try:
         csv_file = pd.read_csv('vote_erection.csv')
         csv_file = csv_file[csv_file['sgId'] == 20200415]

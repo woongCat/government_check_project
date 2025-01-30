@@ -19,14 +19,16 @@ def get_api_data():
     params = {
         'serviceKey': serviceKey,
         'pageNo': '1',        # 페이지 번호
-        'numOfRows': '50',    # 한 번에 가져올 데이터 개수
+        'numOfRows': '10',    # 한 번에 가져올 데이터 개수
         'resultType': 'json', # 응답 형식 (JSON)
-        'sgId': '20200415',   # 선거 ID
+        'sgId': '20080409',   # 선거 ID
         'sgTypecode': '2',    # 선거 구분 코드
-        'cnddtId': '100137103', # 후보자 ID
+        'cnddtId': '100003487', # 후보자 ID
     }
     
     response = requests.get(base_url, params=params)
+    print(response)
+    print(response.text)
     if response.status_code == 200:
         try:
             response_json = response.json()
