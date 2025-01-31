@@ -3,6 +3,8 @@ from dotenv import load_dotenv
 import os
 import json 
 
+# 추후 dag로 변경될 필요 있음
+
 load_dotenv()
 key = os.getenv("OPEN_GOVERMETN_API_KEY")
 
@@ -17,6 +19,7 @@ def get_conf_dates():
         return conf_date_list
         
 def get_responses():
+    # 국회 일정 가져오기
     url = "https://open.assembly.go.kr/portal/openapi/nzbyfwhwaoanttzje"
     conf_date_list = get_conf_dates()
     for conf_date in conf_date_list:
@@ -36,6 +39,7 @@ def get_responses():
                 json.dump(response.json(), f)
         else:
             print(response.text)
+            response.raise_for_status()
         
 if __name__ == "__main__":
     get_responses()

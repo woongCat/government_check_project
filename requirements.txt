@@ -1,9 +1,5 @@
-pandas
-numpy
-seaborn
-matplotlib
 requests
 python-dotenv
 apache-airflow
-elasticsearch
-json-flatten
+
+pdfplumber
