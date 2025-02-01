@@ -20,14 +20,22 @@ def get_conf_dates():
             conf_date_list.append(row)
     return conf_date_list
 
-def get_pdf_urls(file_path):
+def get_pdf_urls(file):
     # pdf_url을 중복 제거해서 가져오는 함수
-    file = read_json(file_path)
     url_count = file['nzbyfwhwaoanttzje'][0]['head'][0]['list_total_count']
     url_set = set()
     for i in range(url_count):
         url_set.add(file['nzbyfwhwaoanttzje'][1]['row'][i]['CONF_LINK_URL'])
     print('url_set가 저장되었습니다.')
+    return url_set
+
+def get_pdf_title(file):
+    # pdf_title을 중복 제거해서 가져오는 함수
+    url_count = file['nzbyfwhwaoanttzje'][0]['head'][0]['list_total_count']
+    url_set = set()
+    for i in range(url_count):
+        url_set.add(file['nzbyfwhwaoanttzje'][1]['row'][i]['TITLE'])
+    print('pdf_title이 저장되었습니다.')
     return url_set
 
 def pdf_urls_to_csv():
@@ -38,7 +46,8 @@ def pdf_urls_to_csv():
         writer = csv.writer(wf)
         for conf_date in conf_date_list:
             read_path = f"congress_meeting/meetings/{conf_date[0]}.json"
-            writer.writerow([conf_date,get_pdf_urls(read_path)])
+            file = read_json(read_path)
+            writer.writerow([conf_date,get_pdf_title(file),get_pdf_urls(file)])
     print('csv 저장이 완료 되었습니다.')
             
         
