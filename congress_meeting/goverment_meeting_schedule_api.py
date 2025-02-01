@@ -6,9 +6,7 @@ import os
 # 나중에 airflow에 추가되야 하는 코드
 
 load_dotenv()
-
 key = os.getenv("OPEN_GOVERMETN_API_KEY")
-
 url = "https://open.assembly.go.kr/portal/openapi/nekcaiymatialqlxr"
 
 params = {

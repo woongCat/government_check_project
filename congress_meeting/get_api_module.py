@@ -3,6 +3,8 @@ import requests
 import os
 import json
 
+# 나중에 추가되어야 함.
+
 class GET_API:
     def __init__(self):
         load_dotenv()
