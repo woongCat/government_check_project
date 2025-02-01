@@ -178,3 +178,5 @@ cython_debug/
 # SQL configuration file
 .vscode/
 
+# for check file
+test.py

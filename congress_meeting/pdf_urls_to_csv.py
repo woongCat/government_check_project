@@ -26,7 +26,7 @@ def get_pdf_urls(file):
     url_count = file['nzbyfwhwaoanttzje'][0]['head'][0]['list_total_count']
     url_set = set()
     for i in range(url_count):
-        url_set.add(file['nzbyfwhwaoanttzje'][1]['row'][i]['CONF_LINK_URL'])
+        url_set.add(file['nzbyfwhwaoanttzje'][1]['row'][i]['PDF_LINK_URL'])
     print('url_set가 저장되었습니다.')
     return url_set
 
@@ -39,18 +39,22 @@ def get_pdf_title(file):
     print('pdf_title이 저장되었습니다.')
     return url_set
 
-def make_pdf_id(conf_date,title):
-    """elastic search에 id를 만들어주는 함수"""
-    id_regex = re.compile("[0-9]*회 [0-9]*차")
+def make_pdf_id(conf_date,title): #확장성을 고려해 어느 회의인지도 추가하는 걸로
+    """elastic search에 필요한 id를 만들어주는 함수"""
+    id_regex = re.compile("[0-9]*회 [0-9]*차 국회본회의")
     pdf_id = '-'.join(id_regex.findall(title)[0].split())+'-'+conf_date
     return pdf_id
 
-def pdf_urls_to_csv():
+def pdf_urls_to_csv(): # csv가 나중에 postgrs여도 괜찮을 것 같음
     """conf_date와 url을 가져와서 csv로 저장하는 함수"""
     conf_date_list = get_conf_dates()
     write_path = 'congress_meeting/pdf_url.csv'
+    # csv로 저장
     with open(write_path,'w') as wf:
         writer = csv.writer(wf)
+        # id, title, date
+        writer.writerow(["pdf_id", "title", "conf_date",  "url"])
+        # 날짜별 회의제목, 회의록url 가져오기
         for conf_date in conf_date_list:
             read_path = f"congress_meeting/meetings/{conf_date}.json"
             file = read_json(read_path)
@@ -59,7 +63,8 @@ def pdf_urls_to_csv():
             # 중복이 제거되고 안에 여러개가 있을 수 있으니 분리를 위해 추가
             for title,url in zip(title_set, url_set):
                 pdf_id = make_pdf_id(conf_date,title)
-                writer.writerow([pdf_id, conf_date, title, url])
+                title = title.split('(')[0].strip()
+                writer.writerow([pdf_id, title, conf_date, url])
     print('csv 저장이 완료 되었습니다.')
             
 if __name__ == "__main__":

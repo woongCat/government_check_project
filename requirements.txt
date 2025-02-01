@@ -1,6 +1,7 @@
 requests
 python-dotenv
 apache-airflow
+pandas
 
 pdfplumber
 elasticsearch
