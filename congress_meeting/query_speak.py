@@ -19,17 +19,19 @@ es = Elasticsearch(
 index_name = "congress_meetings"
 
 # 모든 데이터 조회
-def get_all_documents():
+def get_speaker_documents(speaker_name="김영호"):
     query = {
         "query": {
-            "match_all": {}
+            "match": {
+                "speaker": speaker_name  # ✅ 발언자 필터 적용
+            }
         }
     }
-    
-    res = es.search(index=index_name, body=query, size=10)  # 최대 10개 문서 조회
+
+    res = es.search(index=index_name, body=query, size=10)  # 최대 10개 조회
     return res['hits']['hits']
 
 # 데이터 가져오기
-documents = get_all_documents()
+documents = get_speaker_documents()
 for doc in documents:
     print(f"문서 ID: {doc['_id']}, 내용: {doc['_source']}")
