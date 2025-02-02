@@ -4,7 +4,7 @@ import json
 import os
 
 # 나중에 airflow에 추가되야 하는 코드
-def get_schedule(url): # comittee에도 똑같은 함수 있음
+def get_schedule(url):
     load_dotenv()
     key = os.getenv("OPEN_GOVERMETN_API_KEY")
     
@@ -37,12 +37,13 @@ def get_schedule(url): # comittee에도 똑같은 함수 있음
         pIndex += 1
         
     # JSON으로 저장
-    file_path = 'congress/main_meetings/json/congress_schedule.json'
+    file_path = "comittee/json/comittee_schedule.json"
     with open(file_path, "w", encoding="utf-8") as f:
         json.dump(all_data, f, ensure_ascii=False, indent=4)
     
     print(f"✅ 모든 데이터를 {file_path}에 저장 완료!")
 
 if __name__ == "__main__":
-    url = "https://open.assembly.go.kr/portal/openapi/nekcaiymatialqlxr"
+    url = "https://open.assembly.go.kr/portal/openapi/nrsldhjpaemrmolla"
     get_schedule(url)
+
