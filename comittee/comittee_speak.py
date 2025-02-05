@@ -69,7 +69,7 @@ def get_responses(meeting_date_list):
 
         if response.status_code == 200:
             with open (f"comittee/comittee_meetings/{meeting_date}.json",'w') as f:
-                json.dump(response.json(), f)
+                json.dump(all_data, f)
         else:
             print(response.text)
             response.raise_for_status()
