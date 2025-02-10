@@ -49,7 +49,7 @@ def make_pdf_id(conf_date, title):
     return pdf_id
 
 def make_committee_name(title):
-    """ElasticSearch에 저장할 commit name를 생성"""
+    """ElasticSearch에 저장할 committee_name를 생성"""
     committee_name = title.split()[-1]
     return committee_name
 

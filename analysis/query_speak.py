@@ -16,10 +16,10 @@ es = Elasticsearch(
 )
 
 # 인덱스명 설정 (저장된 데이터가 들어 있는 인덱스)
-index_name = "congress_meetings"
+index_name = "comitee_meetings"
 
 # 모든 데이터 조회
-def get_speaker_documents(speaker_name="김영호"):
+def get_speaker_documents(speaker_name="교육위원장 김영호"):
     query = {
         "query": {
             "match": {
@@ -28,7 +28,7 @@ def get_speaker_documents(speaker_name="김영호"):
         }
     }
 
-    res = es.search(index=index_name, body=query, size=10)  # 최대 10개 조회
+    res = es.search(index=index_name, body=query, size=100)  # 최대 10개 조회
     return res['hits']['hits']
 
 # 데이터 가져오기

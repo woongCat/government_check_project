@@ -4,5 +4,6 @@ apache-airflow
 pandas
 
 pdfplumber
-elasticsearch
 openai
+pymongo
+psycopg2-binary

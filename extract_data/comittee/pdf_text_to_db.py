@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 def read_date_title_url():
     """csv를 읽어서 id, date, title, pdf_url를 가져오는 함수"""
-    file_path = "congress/main_meetings/csv/pdf_url.csv"
+    file_path = "comittee/csv/meeting_url.csv"
     date_title_url_df = pd.read_csv(file_path)
     return date_title_url_df.values.tolist()  # DataFrame을 한 번에 리스트로 변환
 
@@ -41,8 +41,9 @@ def get_pdf_to_text(url):
         print(f"PDF 다운로드 실패: {e}")
     
     return ""  # 오류 발생 시 빈 문자열 반환
+
             
-def get_speaker_data(id,title,date,text):
+def get_speaker_data(id,title,date, committee_name, text):
     """ 텍스트에서 발언자와 발언 내용을 추출하는 함수 """
     speaker_pattern = re.compile(r"◯([\w]+ [\w]+)\s*\n*([\s\S]+?)(?=\n◯|\Z)", re.MULTILINE)
     speech_list = []
@@ -54,6 +55,7 @@ def get_speaker_data(id,title,date,text):
         speech_list.append({
             "document_id": id,
             "title": title,
+            "committee_name" : committee_name,
             "date": date,
             "speaker": speaker, # 발언자
             "text": speech, # 발언
@@ -93,7 +95,7 @@ def save_to_elasticsearch(data):
 if __name__ == "__main__":
     # PDF 다운로드 URL
     url_csv = read_date_title_url()
-    for id, title, date, pdf_url in url_csv:
+    for id, title, committee_name, date, pdf_url in url_csv:
         pdf_text = get_pdf_to_text(pdf_url)
-        speech_data = get_speaker_data(id, title, date, pdf_text)
+        speech_data = get_speaker_data(id, title, committee_name, date, pdf_text)
         save_to_elasticsearch(speech_data)
