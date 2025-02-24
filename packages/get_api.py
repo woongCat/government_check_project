@@ -1,5 +1,6 @@
 import requests
 import os
+import json
 from dotenv import load_dotenv
 import logging
 
@@ -77,7 +78,7 @@ class GET_API:
         log(f"📌 전체 일정 데이터 로드 완료! 총 {len(all_data)} 페이지 수집")
         return all_data
 
-    def get_pdf_url(self, url, meeting_date_list, unit_cd="100022", page_size=100):
+    def get_pdf_url(self, url, meeting_date_list, unit_cd="22", page_size=100):
         """
         회의록 PDF URL을 가져오는 함수
         """
@@ -112,7 +113,6 @@ class GET_API:
                     log(f"📢 {meeting_date}에 대한 데이터 없음, 반복 중지", "warning")
                     break
 
-                all_data.append(data)
                 get_pdf_dates.add(meeting_date)
                 log(f"✅ {meeting_date} 데이터 추가 (페이지 {pIndex})")
                 
@@ -122,9 +122,11 @@ class GET_API:
                     break
                 
                 try:
-                    page_data = data[key_name][1]['row']
-                    all_data.append(page_data)
-                    log(f"✅ {pIndex} 페이지 데이터 추가 (총 {len(page_data)}개)")
+                    rows = data[key_name][1]['row']
+                    for i in range(len(rows)):
+                        page_data = rows[i]
+                        all_data.append(page_data)
+                        log(f"✅ {pIndex} 페이지 데이터 추가 (총 {len(page_data)}개)")
                 except (KeyError, IndexError) as e:
                     log(f"❌ 데이터 구조 오류: {e}", "error")
                     break
@@ -133,5 +135,7 @@ class GET_API:
 
         get_pdf_dates = list(get_pdf_dates)
         get_pdf_dates.sort()
+        # with open('data_json.json', 'w') as f:
+        #     json.dump(all_data, f)
         log(f"📌 전체 PDF URL 데이터 로드 완료! 총 {len(all_data)}개 수집")
         return all_data, get_pdf_dates

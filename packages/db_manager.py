@@ -42,8 +42,15 @@ class PostgreSQLManager:
         try:
             self.cursor.execute(query, params)
             log(f"✅ PostgreSQL 쿼리 실행 성공: {query}")
-            return self.cursor.fetchall()
+
+            # Check if the query is a SELECT statement
+            if query.strip().upper().startswith("SELECT"):
+                return self.cursor.fetchall()  # Return results for SELECT queries
+            else:
+                self.connection.commit()  # Commit changes for INSERT/UPDATE/DELETE queries
+                return None  # No results to return for non-SELECT queries
         except Exception as e:
+            self.connection.rollback()  # Rollback in case of error
             log(f"❌ PostgreSQL 쿼리 실행 실패: {e}", "error")
             return None
 
@@ -64,9 +71,6 @@ class MongoDBManager:
     def insert_document(self, collection_name, document):
         """
         기본적인 mongo db 삽입 기능
-        
-        *사용중 
-        : schedule_to_mongodb
         """
         try:
             collection = self.db[collection_name]
@@ -101,6 +105,7 @@ class MongoDBManager:
             collection = self.db[collection_name]
             results = list(collection.distinct(select))
             log(f"✅ MongoDB 문서 검색 성공: {select}")
+            log(results)
             return results
         except Exception as e:
             log(f"❌ MongoDB 문서 검색 실패: {e}", "error")
@@ -154,7 +159,7 @@ class DatabaseManager(PostgreSQLManager, MongoDBManager):
             committee_schedule_colleciton_name = schedule_colleciton_name
             try:
                 for i in range(len(committee_schedules)):
-                    log(f"MongoDB 저장 시도! {i}번째, {len(congress_schedules[i])}개 데이터 저장 시도")
+                    log(f"MongoDB 저장 시도! {i}번째, {len(committee_schedules[i])}개 데이터 저장 시도")
                     for j in range(len(committee_schedules[i])):
                         committee_data = committee_schedules[i][j]
                         committee_data['MEETING_DATE'] = '-'.join(committee_data['MEETING_DATE'][:10].split('.')) # 데이터 형식을 - 형태로 바꿔줌
@@ -169,15 +174,15 @@ class DatabaseManager(PostgreSQLManager, MongoDBManager):
         mongodb에 저장된 스케쥴 데이터를 postgresql에 없는 거만 추가하는 함수
         """
         try:
-            for meeting in schedules:
-                date = meeting["MEETING_DATE"]
+            for date in schedules:
+                print(date)
                 self.execute_query(f"""
                     INSERT INTO {table_name} (meeting_date)
                     VALUES (%s)
                     ON CONFLICT (meeting_date) DO NOTHING
                 """, (date,))
             self.connection.commit()
-            log("✅ PostgreSQL 일정 저장 성공")
+            log(f"✅ PostgreSQL {table_name}일정 저장 성공")
         except Exception as e:
             self.connection.rollback()
             log(f"❌ PostgreSQL 일정 저장 실패: {e}", "error")
@@ -195,16 +200,16 @@ class DatabaseManager(PostgreSQLManager, MongoDBManager):
             log(f"❌ PostgreSQL 일정 조회 실패: {e}", "error")
             return None
         
-    def speak_pdf_url_to_mongodb(self, pdfs, collection_name):
+    def speak_pdf_url_to_mongodb(self, pdfs, collection_name): 
         """
         schedule_from_postgresql에서 받은 날짜로 pdf_url을 저장함
         """
         try:
+            print(len(pdfs), len(pdfs[0]))
             for i in range(len(pdfs)):
-                log(f"MongoDB 저장 시도! {i}번째, {len(pdfs[i])}개 데이터 저장 시도")
-                for j in range(len(pdfs[i])):
-                    committee_data = pdfs[i][j]
-                    self.insert_document(collection_name, committee_data)
+                log(f"MongoDB 저장 시도! {i}번째")
+                pdf_data = pdfs[i]
+                self.insert_document(collection_name, pdf_data)
                 log("✅ MongoDB 발언 데이터 저장 성공")
         except Exception as e:
             log(f"❌ MongoDB 발언 데이터 저장 실패: {e}", "error")
@@ -214,8 +219,9 @@ class DatabaseManager(PostgreSQLManager, MongoDBManager):
         그 이후 그 날짜에 get_pdf를 True로 값을 바꿈
         """
         try:
+            query = f"UPDATE {table_name} SET get_pdf = TRUE WHERE get_pdf = FALSE AND meeting_date = %s"
             for date in pdf_dates:
-                self.execute_query(f"UPDATE {table_name} get_pdf = TRUE WHERE get_pdf = FALSE and meeting_date = {date}")
+                self.execute_query(query, (date,))  # ✅ 파라미터화된 쿼리 사용
                 log(f"✅ Postgresql pdf 가져온 상태 변환 성공 {date}")
         except Exception as e:
             log(f"❌ Postgresql pdf 가져온 상태 변환 실패: {e}", "error")
@@ -223,11 +229,37 @@ class DatabaseManager(PostgreSQLManager, MongoDBManager):
         
     def mongodb_pdf_url_to_postgresql(self, collection_name, table_name):
         """
-        api로 받은 speak_pdf_url을 mongodb에 저장하는 함수
+        api로 받은 speak_pdf_url을 postgresql에 저장하는 함수
         """
-        pass
-    
+        try:
+            query = {}
+            select = {"CONF_DATE": 1, "PDF_LINK_URL": 1, "TITLE": 1, "_id": 0}  # _id는 제외하고 선택
+            data = self.find_documents(collection_name, query, select)
+            if data is None:  # Check if data is None
+                log("❌ MongoDB에서 가져온 데이터가 없습니다.", "error")
+                return  # Early exit if no data
+            log("✅ MongoDB 발언 링크 가져오기 성공")
+        except Exception as e:
+            log(f"❌ MongoDB 발언 링크 가져오기 실패: {e}", "error")
+            return  # Early exit on failure
 
+        try:
+            for pdf_data in data:
+                pdf_date = pdf_data["CONF_DATE"]
+                pdf_link = pdf_data["PDF_LINK_URL"]
+                pdf_title = pdf_data["TITLE"]
+                self.execute_query(f"""
+                    INSERT INTO {table_name} (title, conf_date, pdf_url)
+                    VALUES (%s, %s, %s)
+                """, (pdf_title, pdf_date, pdf_link))  # Ensure the order matches
+            self.connection.commit()
+            log("✅ PostgreSQL 발언 링크 저장 성공")
+        except Exception as e:
+            self.connection.rollback()
+            log(f"❌ PostgreSQL 발언 링크 저장 실패: {e}", "error")
+
+        
+    
     def close_connections(self):
         self.close()  # PostgreSQL & MongoDB 둘 다 close 실행
         log("✅ 모든 데이터베이스 연결 종료")
