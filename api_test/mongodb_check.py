@@ -10,7 +10,7 @@ db_list = client.list_database_names()
 print("✅ 현재 MongoDB 데이터베이스 목록:", db_list)
 
 # 데이터 삭제
-collection.delete_many({})
+# collection.delete_many({})
 
 # 데이터 조회
 result = collection.find({},{"MEETTING_DATE":1,"_id":0}).to_list()

@@ -1,0 +1,15 @@
+-- CREATE TABLE CONGRESS_SCHEDULE(
+--     meeting_date DATE PRIMARY KEY,
+--     get_pdf BOOLEAN NOT NULL DEFAULT FALSE
+-- );
+
+-- CREATE TABLE COMITTEE_SCHEDULE(
+--     meeting_date DATE PRIMARY KEY,
+--     get_pdf BOOLEAN NOT NULL DEFAULT FALSE
+-- );
+
+SELECT *
+FROM congress_schedule;
+
+SELECT *
+FROM COMITTEE_SCHEDULE;

@@ -1,5 +1,10 @@
-from common.api_utils import load_api_key, fetch_data
-from common.db_utils import save_to_mongo, get_schedule, schedule_to_postgresql
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+
+from utils.api_utils import load_api_key, fetch_data
+from packages.db_manager import save_to_mongo, get_schedule, schedule_to_postgresql
 
 # airflow에 추가해야함
 

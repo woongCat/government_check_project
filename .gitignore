@@ -181,3 +181,4 @@ cython_debug/
 # for check file
 test.py
 certs
+llm_study
