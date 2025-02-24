@@ -81,7 +81,8 @@ class GET_API:
         """
         회의록 PDF URL을 가져오는 함수
         """
-        all_data = []  
+        all_data = []
+        get_pdf_dates = set()
         log(f"📢 PDF URL 데이터를 {url}에서 가져옵니다.")
 
         for meeting_date in meeting_date_list:
@@ -102,7 +103,7 @@ class GET_API:
                 response = requests.get(url=url, params=params)
                 
                 if response.status_code != 200:
-                    log(f"❌ 요청 실패! 상태 코드: {response.status_code}, 응답: {response.text}", "error")
+                    log(f"❌ {meeting_date} 데이터 요청 실패! 상태 코드: {response.status_code}, 응답: {response.text}", "error")
                     break
 
                 data = response.json()
@@ -112,9 +113,25 @@ class GET_API:
                     break
 
                 all_data.append(data)
+                get_pdf_dates.add(meeting_date)
                 log(f"✅ {meeting_date} 데이터 추가 (페이지 {pIndex})")
+                
+                key_name = url[43:]  # URL에서 API 고유 키 추출
+                if key_name not in data:
+                    log(f"❌ 예상된 키({key_name})가 응답 데이터에 없습니다.", "error")
+                    break
+                
+                try:
+                    page_data = data[key_name][1]['row']
+                    all_data.append(page_data)
+                    log(f"✅ {pIndex} 페이지 데이터 추가 (총 {len(page_data)}개)")
+                except (KeyError, IndexError) as e:
+                    log(f"❌ 데이터 구조 오류: {e}", "error")
+                    break
 
                 pIndex += 1
 
+        get_pdf_dates = list(get_pdf_dates)
+        get_pdf_dates.sort()
         log(f"📌 전체 PDF URL 데이터 로드 완료! 총 {len(all_data)}개 수집")
-        return all_data
+        return all_data, get_pdf_dates

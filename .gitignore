@@ -182,3 +182,4 @@ cython_debug/
 test.py
 certs
 llm_study
+archive
