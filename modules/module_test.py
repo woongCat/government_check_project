@@ -92,6 +92,7 @@ if __name__ == "__main__": # 굳이 코드를 이런식으로 2번 하도록 만
     db_manager.mongodb_pdf_url_to_postgresql(congress_pdfs_colleciton_name, congress_pdfs_colleciton_name)
     logging.info("4-5 | Postgresql에서 위원회 pdf_url 저장")
     db_manager.mongodb_pdf_url_to_postgresql(committee_pdfs_colleciton_name, committee_pdfs_colleciton_name)
+    
     # 5) 발언 데이터 MongoDB에 저장하기
 
     # pdf url에서 text mongo db로 전환하기

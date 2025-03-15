@@ -7,3 +7,4 @@ pdfplumber
 openai
 pymongo
 psycopg2-binary
+streamlit
