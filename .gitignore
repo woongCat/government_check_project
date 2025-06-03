@@ -184,3 +184,6 @@ certs
 llm_study
 archive
 key_changes.json
+
+# for mac
+.DS_Store
