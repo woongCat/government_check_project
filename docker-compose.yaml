@@ -1,30 +1,27 @@
-version: '3.12.7'
-services:
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.6.0
-    container_name: elasticsearch
-    environment:
-      - discovery.type=single-node
-      - ELASTIC_PASSWORD=${ELASTIC_SEARCH_PW}  # 기본 비밀번호 설정
-      - xpack.security.enabled=true
-    ports:
-      - "9200:9200"
-    volumes:
-      - es_data:/usr/share/elasticsearch/data
+version: '3.12'
 
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.6.0
-    container_name: kibana
+services:
+  postgres:
+    image: postgres:14
+    container_name: postgres
     environment:
-      - ELASTICSEARCH_HOSTS=["http://elasticsearch:9200"]
-      - ELASTICSEARCH_USERNAME=elastic
-      - ELASTICSEARCH_PASSWORD=${ELASTIC_SEARCH_PW}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5601:5601"
-    depends_on:
-      - elasticsearch
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  qdrant:
+    image: qdrant/qdrant:v1.7.3
+    container_name: qdrant
+    ports:
+      - "6333:6333"  # REST API
+      - "6334:6334"  # gRPC
+    volumes:
+      - qdrant_data:/qdrant/storage
 
 volumes:
-  es_data:
-    driver: local
-
+  postgres_data:
+  qdrant_data:
