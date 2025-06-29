@@ -1,4 +1,6 @@
 PROJECT_NAME := government_project
+include .env
+export $(shell sed 's/=.*//' .env)
 
 up:
 	docker-compose -p $(PROJECT_NAME) up -d
