@@ -31,18 +31,15 @@ if __name__ == "__main__":
     pdf_url_loader = PDFUrlLoader(connection)
     pdf_url_loader.create_table()
 
-    for item in pdf_data:
-        if not item.get("MEETTING_DATE"):
-            continue  # date가 없는 경우 건너뛰기
-            
-        schedule_data = {
-            "date": item.get("MEETTING_DATE"),
+    for item in pdf_data:            
+        pdf_url_data = {
+            "date": item.get("CONF_DATE"),
             "title": item.get("TITLE"),
-            "description": item.get("DESCRIPTION"),
+            "description": item.get("SUB_NAME"),
             "get_pdf": True,
-            "pdf_url": item.get("PDF_URL"),
+            "pdf_url": item.get("PDF_LINK_URL"),
         }
-        pdf_url_loader.insert(schedule_data)
+        pdf_url_loader.insert(pdf_url_data)
 
     connection.close()
     print("✅ PostgreSQL 저장 완료")

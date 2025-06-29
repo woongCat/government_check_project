@@ -29,28 +29,35 @@ class PDFUrlLoader(BaseLoader):
         logger.info("✅ pdf_url 테이블 생성 완료 (또는 이미 존재함)")
 
     def insert(self, pdf_url_data):
-        logger.info(
-            f"➕ PDF URL 삽입 시도: {pdf_url_data.get('date')}"
-        )
-        query = """
-            INSERT INTO pdf_url (date, title, description, get_pdf, pdf_url)
-            VALUES (
-                %s,
-                COALESCE(%s, ''),
-                COALESCE(%s, ''),
-                COALESCE(%s, FALSE),
-                %s
+        try:
+            logger.info(
+                f"➕ PDF URL 삽입 시도: {pdf_url_data.get('date')}"
             )
-            ON CONFLICT (date, title) DO NOTHING;
-        """
-        params = (
-            pdf_url_data.get("date"),
-            pdf_url_data.get("title"),
-            pdf_url_data.get("description"),
-            pdf_url_data.get("get_pdf"),
-            pdf_url_data.get("pdf_url"),
-        )
-        self._execute_query(query, params)
+            query = """
+                INSERT INTO pdf_url (date, title, description, get_pdf, pdf_url)
+                VALUES (
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s
+                )
+                ON CONFLICT (date, title) DO NOTHING;
+            """
+            params = (
+                pdf_url_data.get("date"),
+                pdf_url_data.get("title"),
+                pdf_url_data.get("description"),
+                pdf_url_data.get("get_pdf"),
+                pdf_url_data.get("pdf_url"),
+            )
+            result = self._execute_query(query, params)
+            if result is not None:
+                logger.debug(f"Query result: {result}")
+            logger.success(f"✅ PDF URL 저장 성공: {pdf_url_data.get('date')}")
+        except Exception as e:
+            logger.error(f"❌ PDF URL 저장 중 오류 발생: {str(e)}")
+            raise
 
     def get_pdf_urls(self, condition=None):
         query = "SELECT id, date, title, description, get_pdf, pdf_url FROM pdf_url"
