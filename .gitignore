@@ -187,3 +187,6 @@ key_changes.json
 
 # for mac
 .DS_Store
+._.DS_Store
+**/.DS_Store
+**/._.DS_Store
