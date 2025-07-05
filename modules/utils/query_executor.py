@@ -1,12 +1,48 @@
-def execute_query(connection, query, params=None):
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+from loguru import logger
+from psycopg2.extensions import connection as pg_connection
+from psycopg2.extras import DictCursor, DictRow
+
+from modules.common.exceptions import DatabaseError
+
+
+def execute_query(
+    connection: pg_connection,
+    query: str,
+    params: Optional[Union[Tuple[Any, ...], Dict[str, Any], List[Any]]] = None,
+) -> Union[List[DictRow], int]:
+    """Execute a database query and return results.
+
+    Args:
+        connection: Database connection object
+        query: SQL query string to execute
+        params: Query parameters (tuple, dict, or list)
+
+    Returns:
+        For SELECT queries: List of result rows
+        For other queries: Number of affected rows
+
+    Raises:
+        DatabaseError: If query execution fails
+    """
+    logger.debug(f"Executing query: {query}")
+    if params:
+        logger.debug(f"With parameters: {params}")
+
     try:
-        with connection.cursor() as cursor:
+        with connection.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(query, params)
+
+            # SELECT 쿼리인 경우 결과 반환
             if query.strip().upper().startswith("SELECT"):
                 return cursor.fetchall()
+            # 그 외 쿼리인 경우 영향받은 행의 수 반환
             else:
                 connection.commit()
-                return True  # ✅ 성공 여부 반환
+                return cursor.rowcount
+
     except Exception as e:
         connection.rollback()
-        raise e
+        logger.error(f"Query failed: {str(e)}")
+        raise DatabaseError(f"Database operation failed: {str(e)}") from e

@@ -28,7 +28,7 @@ class PDFUrlLoader(BaseLoader):
         self._execute_query(query)
         logger.info("✅ pdf_url 테이블 생성 완료 (또는 이미 존재함)")
 
-    def insert(self, pdf_url_data):
+    def load(self, pdf_url_data):
         try:
             logger.info(
                 f"➕ PDF URL 삽입 시도: {pdf_url_data.get('date')}"
@@ -58,11 +58,3 @@ class PDFUrlLoader(BaseLoader):
         except Exception as e:
             logger.error(f"❌ PDF URL 저장 중 오류 발생: {str(e)}")
             raise
-
-    def get_pdf_urls(self, condition=None):
-        query = "SELECT id, date, title, description, get_pdf, pdf_url FROM pdf_url"
-        params = None
-        if condition:
-            query += " WHERE " + condition[0]
-            params = condition[1]
-        return self._execute_query(query, params)
