@@ -1,18 +1,48 @@
 from modules.base.base_pipeline import BasePipeline
-from modules.extract.speech_pdf_extractor import SpeechPDFExtractor
-from modules.load.speech_pdf_loader import SpeechPDFLoader
-from modules.transform.speech_pdf_transformer import SpeechPDFTransformer
+from modules.extract.pdf_to_speech_extractor import PDFToSpeechExtractor
+from modules.load.pdf_to_speech_loader import PDFToSpeechLoader
+from modules.transform.pdf_to_speech_transformer import PDFToSpeechTransformer
+from modules.utils.db_connections import get_postgres_connection
+
+from loguru import logger
 
 class PDFToSpeechPipeline(BasePipeline):
-    def __init__(self, extractor, loader, transformer=None):
+    def __init__(self):
+        connection = get_postgres_connection()
+        extractor = PDFToSpeechExtractor(connection=connection)
+        loader = PDFToSpeechLoader(connection=connection)
+        transformer = PDFToSpeechTransformer()
         super().__init__(extractor, loader, transformer)
 
     def run(self):
-        # 1. 추출
-        raw_data = self.extractor.run()
-        
-        # 2. 변환
-        transformed_data = self.transformer.run(raw_data)
+        logger.info("✅ 병렬로 PDF 추출 시작")
+        raw_data = self.extractor.extract()
+        logger.info(f"✅ 처리 완료: 총 {len(raw_data)}건")
 
-        # 3. 적재
-        self.loader.run(transformed_data)
+        for item in raw_data:
+            logger.info(f"\n{item['title']} ({item['date']})")
+
+            transformed_result = self.transformer.transform(
+                text=item['text'],
+                title=item['title'],
+                date=item['date'],
+                class_name=item['class_name'],
+                file_path=item['file_path'],
+                confer_number=item['confer_number'],
+                dae_number=item['dae_number'],
+                pdf_url_id=item['pdf_url_id']
+            )
+
+            logger.info(f"추출된 발언 수: {len(transformed_result)}")
+            for speech in transformed_result[:3]:
+                logger.info(f"- {speech['speaker']}: {speech['text'][:100]}...")
+
+            if not transformed_result:
+                logger.warning("⚠️ 변환된 발언이 없어 건너뜁니다.")
+                continue
+
+            try:
+                self.loader.load(speech_data=transformed_result)
+                logger.info(f"✅ DB 저장 완료: {len(transformed_result)}건")
+            except Exception as e:
+                logger.error(f"❌ DB 저장 중 오류 발생: {e}")

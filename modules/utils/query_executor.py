@@ -12,20 +12,6 @@ def execute_query(
     query: str,
     params: Optional[Union[Tuple[Any, ...], Dict[str, Any], List[Any]]] = None,
 ) -> Union[List[DictRow], int]:
-    """Execute a database query and return results.
-
-    Args:
-        connection: Database connection object
-        query: SQL query string to execute
-        params: Query parameters (tuple, dict, or list)
-
-    Returns:
-        For SELECT queries: List of result rows
-        For other queries: Number of affected rows
-
-    Raises:
-        DatabaseError: If query execution fails
-    """
     logger.debug(f"Executing query: {query}")
     if params:
         logger.debug(f"With parameters: {params}")
@@ -34,13 +20,15 @@ def execute_query(
         with connection.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(query, params)
 
-            # SELECT 쿼리인 경우 결과 반환
-            if query.strip().upper().startswith("SELECT"):
-                return cursor.fetchall()
-            # 그 외 쿼리인 경우 영향받은 행의 수 반환
-            else:
+            # SELECT 또는 RETURNING 쿼리인 경우 결과 반환
+            if query.strip().upper().startswith("SELECT") or "RETURNING" in query.upper():
+                result = cursor.fetchall()
                 connection.commit()
-                return cursor.rowcount
+                return result
+
+            # 그 외 쿼리인 경우 영향받은 행의 수 반환
+            connection.commit()
+            return cursor.rowcount
 
     except Exception as e:
         connection.rollback()

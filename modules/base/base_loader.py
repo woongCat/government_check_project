@@ -1,9 +1,7 @@
 from abc import ABC, abstractmethod
-from types import TracebackType
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, List, Optional, Union
 
 from loguru import logger
-from typing_extensions import Self
 
 from modules.utils.query_executor import execute_query
 
