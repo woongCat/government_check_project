@@ -7,7 +7,7 @@ import requests
 from io import BytesIO
 from loguru import logger
 
-class SpeechPDFLoader(BaseLoader):
+class PDFToSpeechLoader(BaseLoader):
     def __init__(self, connection):
         super().__init__(connection)
         self._create_tables()

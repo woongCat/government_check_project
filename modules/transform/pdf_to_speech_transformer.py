@@ -5,9 +5,9 @@ from typing import Dict, List
 from modules.base.base_transformer import BaseTransformer
 
 
-class ParliamentSpeechTransformer(BaseTransformer):
+class PDFToSpeechTransformer(BaseTransformer):
     """
-    국회의원 발언 텍스트를 파싱하여 구조화된 리스트로 반환하는 클래스
+    국회 회의록 PDF에서 발언 텍스트를 파싱하여 구조화된 리스트로 반환하는 클래스
     """
 
     def __init__(self, document_id: str, title: str, date: str, committee_name: str):

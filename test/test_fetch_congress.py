@@ -36,10 +36,10 @@ if __name__ == "__main__":
             "date": item.get("CONF_DATE"),
             "title": item.get("TITLE"),
             "description": item.get("SUB_NAME"),
-            "get_pdf": True,
+            "get_pdf": False,
             "pdf_url": item.get("PDF_LINK_URL"),
         }
-        pdf_url_loader.insert(pdf_url_data)
+        pdf_url_loader.load(pdf_url_data)
 
     connection.close()
     print("✅ PostgreSQL 저장 완료")

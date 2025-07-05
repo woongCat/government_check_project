@@ -7,7 +7,7 @@ import requests
 from modules.base.base_extractor import BaseExtractor
 
 
-class SpeechPDFExtractor(BaseExtractor):
+class PDFToSpeechExtractor(BaseExtractor):
     """PDF URL에서 텍스트 추출"""
     def __init__(self, pdf_url: str, title: str, date: str):
         self.pdf_url : str = pdf_url
@@ -37,7 +37,7 @@ class SpeechPDFExtractor(BaseExtractor):
             self.log_info(f"PDF 다운로드 실패: {e}")
             return ""
 
-class SpeechPDFUrlProvider:
+class PDFToSpeechUrlProvider:
     """PDF URL Provider"""
     def __init__(self, connection):            
         self.connection : connection = connection
