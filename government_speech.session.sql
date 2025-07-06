@@ -3,6 +3,6 @@
 -- DROP TABLE IF EXISTS speeches;
 
 -- SELECT * FROM pdf_url;
--- SELECT * FROM speakers;
+SELECT * FROM speakers;
 -- SELECT * FROM speeches;
 
