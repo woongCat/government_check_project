@@ -55,3 +55,4 @@ class ScheduleToPDFPipeline(BasePipeline):
             self.loader.load(item)
 
         logger.info("✅ PostgreSQL 저장 완료")
+        return len(transformed_pdf_data)

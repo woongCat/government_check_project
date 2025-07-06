@@ -11,6 +11,7 @@ from modules.utils.db_helpers import update_get_pdf_status
 class PDFToSpeechPipeline(BasePipeline):
     def __init__(self):
         connection = get_postgres_connection()
+        self.connection = connection
         extractor = PDFToSpeechExtractor(connection=connection)
         loader = PDFToSpeechLoader(connection=connection)
         transformer = PDFToSpeechTransformer()
