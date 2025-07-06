@@ -34,3 +34,11 @@ def execute_query(
         connection.rollback()
         logger.error(f"Query failed: {str(e)}")
         raise DatabaseError(f"Database operation failed: {str(e)}") from e
+
+
+def update_get_pdf_status(connection, pdf_url_id: str, status: bool) -> None:
+    """Update the get_pdf status in the database."""
+    query = "UPDATE pdf_url SET get_pdf = %s WHERE pdf_url_id = %s"
+    with connection.cursor() as cur:
+        cur.execute(query, (status, pdf_url_id))
+        connection.commit()

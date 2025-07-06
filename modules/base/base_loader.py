@@ -3,7 +3,7 @@ from typing import Any, List, Optional, Union
 
 from loguru import logger
 
-from modules.utils.query_executor import execute_query
+from modules.utils.db_helpers import execute_query
 
 
 class LoaderError(Exception):
