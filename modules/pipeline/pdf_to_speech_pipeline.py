@@ -1,10 +1,12 @@
+from loguru import logger
+
 from modules.base.base_pipeline import BasePipeline
 from modules.extract.pdf_to_speech_extractor import PDFToSpeechExtractor
 from modules.load.pdf_to_speech_loader import PDFToSpeechLoader
 from modules.transform.pdf_to_speech_transformer import PDFToSpeechTransformer
 from modules.utils.db_connections import get_postgres_connection
+from modules.utils.db_helpers import update_get_pdf_status
 
-from loguru import logger
 
 class PDFToSpeechPipeline(BasePipeline):
     def __init__(self):
@@ -23,14 +25,14 @@ class PDFToSpeechPipeline(BasePipeline):
             logger.info(f"\n{item['title']} ({item['date']})")
 
             transformed_result = self.transformer.transform(
-                text=item['text'],
-                title=item['title'],
-                date=item['date'],
-                class_name=item['class_name'],
-                file_path=item['file_path'],
-                confer_number=item['confer_number'],
-                dae_number=item['dae_number'],
-                pdf_url_id=item['pdf_url_id']
+                text=item["text"],
+                title=item["title"],
+                date=item["date"],
+                class_name=item["class_name"],
+                file_path=item["file_path"],
+                confer_number=item["confer_number"],
+                dae_number=item["dae_number"],
+                pdf_url_id=item["pdf_url_id"],
             )
 
             logger.info(f"추출된 발언 수: {len(transformed_result)}")
@@ -44,5 +46,7 @@ class PDFToSpeechPipeline(BasePipeline):
             try:
                 self.loader.load(speech_data=transformed_result)
                 logger.info(f"✅ DB 저장 완료: {len(transformed_result)}건")
+                update_get_pdf_status(self.connection, item["pdf_url_id"], True)
             except Exception as e:
+                update_get_pdf_status(self.connection, item["pdf_url_id"], False)
                 logger.error(f"❌ DB 저장 중 오류 발생: {e}")

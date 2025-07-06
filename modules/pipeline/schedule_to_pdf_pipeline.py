@@ -1,3 +1,5 @@
+from loguru import logger
+
 from modules.base.base_pipeline import BasePipeline
 from modules.constants.url_constants import (
     MAIN_CONGRESS_SCHEDULE_URL,
@@ -11,6 +13,7 @@ from modules.transform.pdf_url_transformer import PDFUrlTransformer
 from modules.utils.db_connections import get_postgres_connection
 
 # TODO : 없는 스케쥴만 가져오는 기능 추가 -> 지금은 구현이 먼저
+
 
 class ScheduleToPDFPipeline(BasePipeline):
     def __init__(self, unit_cd="22"):
@@ -28,27 +31,27 @@ class ScheduleToPDFPipeline(BasePipeline):
 
     def run(self):
         # Step 1: 일정 추출
-        print("✅ 일정 extractor 시작")
+        logger.info("✅ 일정 extractor 시작")
         schedule_data = self.schedule_extractor.extract()
-        print("✅ 일정 데이터 추출 완료")
+        logger.info("✅ 일정 데이터 추출 완료")
 
         # Step 2: 날짜 리스트 생성
         meeting_dates = self.schedule_transformer.transform(schedule_data)
-        print(f"✅ 날짜 리스트 생성 완료 ({len(meeting_dates)}건)")
+        logger.info(f"✅ 날짜 리스트 생성 완료 ({len(meeting_dates)}건)")
 
         # Step 3: PDF URL 추출
         self.pdf_extractor.meeting_dates = meeting_dates
-        print("✅ PDF extractor 시작")
+        logger.info("✅ PDF extractor 시작")
         pdf_data, fetched_dates = self.pdf_extractor.extract()
-        print(f"✅ PDF 데이터 추출 완료 ({len(pdf_data)}건)")
+        logger.info(f"✅ PDF 데이터 추출 완료 ({len(pdf_data)}건)")
 
         # Step 4: 변환
         transformed_pdf_data = self.pdf_transformer.transform(pdf_data)
-        print(f"✅ PDF 데이터 변환 완료 ({len(transformed_pdf_data)}건)")
+        logger.info(f"✅ PDF 데이터 변환 완료 ({len(transformed_pdf_data)}건)")
 
         # Step 5: DB 저장
         self.loader.create_table()
         for item in transformed_pdf_data:
             self.loader.load(item)
 
-        print("✅ PostgreSQL 저장 완료")
+        logger.info("✅ PostgreSQL 저장 완료")

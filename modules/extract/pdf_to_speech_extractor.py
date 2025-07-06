@@ -6,6 +6,7 @@ import pdfplumber
 import httpx
 
 from modules.base.base_extractor import BaseExtractor
+from modules.utils.db_helpers import update_get_pdf_status
 
 
 class PDFToSpeechExtractor(BaseExtractor):
@@ -56,10 +57,6 @@ class PDFToSpeechExtractor(BaseExtractor):
                         page.extract_text() for page in pdf.pages if page.extract_text()
                     )
             self.log_info(f"✅ 처리 완료: {title}")
-            update_query = "UPDATE pdf_url SET get_pdf = true WHERE pdf_url_id = %s"
-            with self.connection.cursor() as cur:
-                cur.execute(update_query, (pdf_url_id,))
-                self.connection.commit()
             return {
                 "pdf_url_id": pdf_url_id,
                 "title": title,
@@ -72,10 +69,7 @@ class PDFToSpeechExtractor(BaseExtractor):
             }
         except Exception as e:
             self.log_info(f"❌ {title} PDF 처리 실패: {e}")
-            update_query = "UPDATE pdf_url SET get_pdf = false WHERE pdf_url_id = %s"
-            with self.connection.cursor() as cur:
-                cur.execute(update_query, (pdf_url_id,))
-                self.connection.commit()
+            update_get_pdf_status(self.connection, pdf_url_id, False)
             raise
 
     def extract_all(self, max_workers: int = 10) -> List[Dict[str, str]]:
