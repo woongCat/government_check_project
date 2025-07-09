@@ -4,7 +4,7 @@ from loguru import logger
 from psycopg2.extensions import connection as pg_connection
 from psycopg2.extras import DictCursor, DictRow
 
-from modules.common.exceptions import DatabaseError
+from modules.utils.exceptions import DatabaseError
 
 
 def execute_query(
